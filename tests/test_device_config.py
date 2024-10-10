@@ -33,6 +33,7 @@ CONDMAP_SCHEMA = vol.Schema(
         vol.Optional("value"): vol.Maybe(vol.Any(str, int, bool, float)),
         vol.Optional("value_redirect"): str,
         vol.Optional("value_mirror"): str,
+        vol.Optional("available"): str,
         vol.Optional("range"): {
             vol.Required("min"): int,
             vol.Required("max"): int,
@@ -520,6 +521,21 @@ class TestDeviceConfig(IsolatedAsyncioTestCase):
                         key.startswith("sec"),
                         f"misspelled secondary_entities in {cfg}",
                     )
+
+    def test_configs_can_be_matched(self):
+        """Test that the config files can be matched to a device."""
+        for cfg in available_configs():
+            required_dps = 0
+            parsed = TuyaDeviceConfig(cfg)
+            for entity in parsed.all_entities():
+                for dp in entity.dps():
+                    if not dp.optional:
+                        required_dps += 1
+            self.assertGreater(
+                required_dps,
+                0,
+                msg=f"No required dps found in {cfg}",
+            )
 
     # Most of the device_config functionality is exercised during testing of
     # the various supported devices.  These tests concentrate only on the gaps.

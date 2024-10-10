@@ -51,9 +51,9 @@ class TestVorkVK6267AWPurifier(
             TIMER_DPS,
             self.entities.get("select_timer"),
             {
-                "cancel": "off",
-                "1h": "1 hour",
-                "2h": "2 hours",
+                "cancel": "cancel",
+                "1h": "1h",
+                "2h": "2h",
             },
         )
         self.setUpBasicButton(
@@ -98,7 +98,9 @@ class TestVorkVK6267AWPurifier(
     def test_supported_features(self):
         self.assertEqual(
             self.subject.supported_features,
-            FanEntityFeature.PRESET_MODE,
+            FanEntityFeature.PRESET_MODE
+            | FanEntityFeature.TURN_ON
+            | FanEntityFeature.TURN_OFF,
         )
 
     def test_preset_modes(self):

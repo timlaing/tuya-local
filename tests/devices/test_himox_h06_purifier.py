@@ -49,9 +49,9 @@ class TestHimoxH06Purifier(
                     "dps": TIMER_DPS,
                     "name": "select_timer",
                     "options": {
-                        "cancel": "Off",
-                        "4h": "4 hours",
-                        "8h": "8 hours",
+                        "cancel": "cancel",
+                        "4h": "4h",
+                        "8h": "8h",
                     },
                 },
                 {
@@ -97,7 +97,9 @@ class TestHimoxH06Purifier(
     def test_supported_features(self):
         self.assertEqual(
             self.subject.supported_features,
-            FanEntityFeature.SET_SPEED,
+            FanEntityFeature.SET_SPEED
+            | FanEntityFeature.TURN_OFF
+            | FanEntityFeature.TURN_ON,
         )
 
     def test_speed(self):
