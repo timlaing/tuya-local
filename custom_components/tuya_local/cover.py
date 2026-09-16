@@ -9,11 +9,15 @@ from homeassistant.components.cover import (
     CoverEntity,
     CoverEntityFeature,
 )
+from homeassistant.util.percentage import (
+    percentage_to_ranged_value,
+    ranged_value_to_percentage,
+)
 
 from .device import TuyaLocalDevice
+from .entity import TuyaLocalEntity
 from .helpers.config import async_tuya_setup_platform
 from .helpers.device_config import TuyaEntityConfig
-from .helpers.mixin import TuyaLocalEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,6 +47,7 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
         dps_map = self._init_begin(device, config)
         self._position_dp = dps_map.pop("position", None)
         self._currentpos_dp = dps_map.pop("current_position", None)
+        self._tiltpos_dp = dps_map.pop("tilt_position", None)
         self._control_dp = dps_map.pop("control", None)
         self._action_dp = dps_map.pop("action", None)
         self._open_dp = dps_map.pop("open", None)
@@ -58,7 +63,10 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
                 self._support_flags |= CoverEntityFeature.OPEN
             if "close" in self._control_dp.values(self._device):
                 self._support_flags |= CoverEntityFeature.CLOSE
-        # Tilt not yet supported, as no test devices known
+        if self._tiltpos_dp:
+            self._support_flags |= CoverEntityFeature.SET_TILT_POSITION
+
+        # Open/close/stop tilt not yet supported, as no test devices known
 
     @property
     def device_class(self):
@@ -104,11 +112,22 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
 
         if self._action_dp:
             state = self._action_dp.get_value(self._device)
-            return self._state_to_percent(state)
+            if state is not None:
+                return self._state_to_percent(state)
 
         if self._position_dp:
             pos = self._position_dp.get_value(self._device)
             return pos
+
+    @property
+    def current_cover_tilt_position(self):
+        """Return current tilt position of cover."""
+        if self._tiltpos_dp:
+            r = self._tiltpos_dp.range(self._device)
+            val = self._tiltpos_dp.get_value(self._device)
+            if r and val is not None:
+                return ranged_value_to_percentage(r, val)
+            return val
 
     @property
     def _current_state(self):
@@ -128,9 +147,13 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
         elif pos > 95:
             return "opened"
 
-        if self._currentpos_dp and self._position_dp:
+        if (
+            self._currentpos_dp
+            and self._currentpos_dp.get_value(self._device) is not None
+            and self._position_dp
+        ):
             setpos = self._position_dp.get_value(self._device)
-            if setpos == pos:
+            if setpos is not None and abs(setpos - pos) <= 2:
                 # if the current position is around the set position,
                 # which is not closed, then we want is_closed to return
                 # false, so HA gets the full state from position.
@@ -179,9 +202,11 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
         if self._control_dp and "open" in self._control_dp.values(self._device):
+            _LOGGER.info("%s opening", self._config.config_id)
             await self._control_dp.async_set_value(self._device, "open")
         elif self._position_dp:
             pos = 100
+            _LOGGER.info("%s opening to 100%%", self._config.config_id)
             await self._position_dp.async_set_value(self._device, pos)
         else:
             raise NotImplementedError()
@@ -189,9 +214,11 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
         if self._control_dp and "close" in self._control_dp.values(self._device):
+            _LOGGER.info("%s closing", self._config.config_id)
             await self._control_dp.async_set_value(self._device, "close")
         elif self._position_dp:
             pos = 0
+            _LOGGER.info("%s closing to 0%%", self._config.config_id)
             await self._position_dp.async_set_value(self._device, pos)
         else:
             raise NotImplementedError()
@@ -201,13 +228,39 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
         if position is None:
             raise AttributeError()
         if self._position_dp:
+            _LOGGER.info(
+                "%s setting position to %d%%", self._config.config_id, position
+            )
             await self._position_dp.async_set_value(self._device, position)
         else:
             raise NotImplementedError()
 
+    async def async_set_cover_tilt_position(self, tilt_position, **kwargs):
+        """Set the cover tilt position."""
+        if self._tiltpos_dp:
+            # If there is a fixed list of values, snap to the closest one
+            if self._tiltpos_dp.values(self._device):
+                tilt_position = min(
+                    self._tiltpos_dp.values(self._device),
+                    key=lambda x: abs(x - tilt_position),
+                )
+            elif self._tiltpos_dp.range(self._device):
+                r = self._tiltpos_dp.range(self._device)
+                tilt_position = percentage_to_ranged_value(r, tilt_position)
+
+            _LOGGER.info(
+                "%s setting tilt position to %d%%",
+                self._config.config_id,
+                tilt_position,
+            )
+            await self._tiltpos_dp.async_set_value(self._device, tilt_position)
+        else:
+            raise NotImplementedError
+
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
         if self._control_dp and "stop" in self._control_dp.values(self._device):
+            _LOGGER.info("%s stopping", self._config.config_id)
             await self._control_dp.async_set_value(self._device, "stop")
         else:
             raise NotImplementedError()

@@ -5,6 +5,7 @@ Setup for different kinds of Tuya humidifier devices
 import logging
 
 from homeassistant.components.humidifier import (
+    HumidifierAction,
     HumidifierDeviceClass,
     HumidifierEntity,
     HumidifierEntityFeature,
@@ -15,9 +16,9 @@ from homeassistant.components.humidifier.const import (
 )
 
 from .device import TuyaLocalDevice
+from .entity import TuyaLocalEntity
 from .helpers.config import async_tuya_setup_platform
 from .helpers.device_config import TuyaEntityConfig
-from .helpers.mixin import TuyaLocalEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,7 +50,11 @@ class TuyaLocalHumidifier(TuyaLocalEntity, HumidifierEntity):
         self._humidity_dp = dps_map.pop("humidity", None)
         self._mode_dp = dps_map.pop("mode", None)
         self._switch_dp = dps_map.pop("switch", None)
+        self._action_dp = dps_map.pop("action", None)
         self._init_end(dps_map)
+
+        if self._humidity_dp is not None:
+            self._attr_target_humidity_step = self._humidity_dp.step(device)
 
         self._support_flags = HumidifierEntityFeature(0)
         if self._mode_dp:
@@ -77,12 +82,32 @@ class TuyaLocalHumidifier(TuyaLocalEntity, HumidifierEntity):
             return self.available
         return self._switch_dp.get_value(self._device)
 
+    @property
+    def action(self):
+        """Return the current action."""
+        if self._action_dp:
+            if not self.is_on:
+                return HumidifierAction.OFF
+
+            action = self._action_dp.get_value(self._device)
+            try:
+                return HumidifierAction(action) if action else None
+            except ValueError:
+                _LOGGER.warning(
+                    "%s/%s: Unrecognised action %s ignored",
+                    self._config._device.config,
+                    self.name or "humidifier",
+                    action,
+                )
+
     async def async_turn_on(self, **kwargs):
         """Turn the switch on"""
+        _LOGGER.info("%s turning on", self._config.config_id)
         await self._switch_dp.async_set_value(self._device, True)
 
     async def async_turn_off(self, **kwargs):
         """Turn the switch off"""
+        _LOGGER.info("%s turning off", self._config.config_id)
         await self._switch_dp.async_set_value(self._device, False)
 
     @property
@@ -117,7 +142,7 @@ class TuyaLocalHumidifier(TuyaLocalEntity, HumidifierEntity):
     async def async_set_humidity(self, humidity):
         if self._humidity_dp is None:
             raise NotImplementedError()
-
+        _LOGGER.info("%s setting humidity to %s", self._config.config_id, humidity)
         await self._humidity_dp.async_set_value(self._device, humidity)
 
     @property
@@ -137,4 +162,5 @@ class TuyaLocalHumidifier(TuyaLocalEntity, HumidifierEntity):
         """Set the preset mode."""
         if self._mode_dp is None:
             raise NotImplementedError()
+        _LOGGER.info("%s setting mode to %s", self._config.config_id, mode)
         await self._mode_dp.async_set_value(self._device, mode)

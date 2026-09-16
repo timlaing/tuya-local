@@ -7,9 +7,9 @@ import logging
 from homeassistant.components.button import ButtonDeviceClass, ButtonEntity
 
 from .device import TuyaLocalDevice
+from .entity import TuyaLocalEntity
 from .helpers.config import async_tuya_setup_platform
 from .helpers.device_config import TuyaEntityConfig
-from .helpers.mixin import TuyaLocalEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -57,4 +57,5 @@ class TuyaLocalButton(TuyaLocalEntity, ButtonEntity):
 
     async def async_press(self):
         """Press the button"""
+        _LOGGER.info("%s pressing button", self._config._device.config)
         await self._button_dp.async_set_value(self._device, True)

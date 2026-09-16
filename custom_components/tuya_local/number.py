@@ -12,9 +12,9 @@ from homeassistant.components.number.const import (
 )
 
 from .device import TuyaLocalDevice
+from .entity import TuyaLocalEntity, unit_from_ascii
 from .helpers.config import async_tuya_setup_platform
 from .helpers.device_config import TuyaEntityConfig
-from .helpers.mixin import TuyaLocalEntity, unit_from_ascii
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,6 +50,7 @@ class TuyaLocalNumber(TuyaLocalEntity, NumberEntity):
         self._unit_dps = dps_map.pop("unit", None)
         self._min_dps = dps_map.pop("minimum", None)
         self._max_dps = dps_map.pop("maximum", None)
+        self._decimal_dps = dps_map.pop("decimal", None)
         self._init_end(dps_map)
 
     @property
@@ -70,14 +71,18 @@ class TuyaLocalNumber(TuyaLocalEntity, NumberEntity):
     @property
     def native_min_value(self):
         if self._min_dps is not None:
-            return self._min_dps.get_value(self._device)
+            minimum = self._min_dps.get_value(self._device)
+            if minimum is not None:
+                return minimum
         r = self._value_dps.range(self._device)
         return DEFAULT_MIN_VALUE if r is None else r[0]
 
     @property
     def native_max_value(self):
         if self._max_dps is not None:
-            return self._max_dps.get_value(self._device)
+            maximum = self._max_dps.get_value(self._device)
+            if maximum is not None:
+                return maximum
         r = self._value_dps.range(self._device)
         return DEFAULT_MAX_VALUE if r is None else r[1]
 
@@ -106,8 +111,25 @@ class TuyaLocalNumber(TuyaLocalEntity, NumberEntity):
     @property
     def native_value(self):
         """Return the current value of the number."""
-        return self._value_dps.get_value(self._device)
+        val = self._value_dps.get_value(self._device)
+        if self._decimal_dps is not None:
+            decimal = self._decimal_dps.get_value(self._device)
+            if decimal is not None:
+                val = val + decimal
+        return val
 
     async def async_set_native_value(self, value):
         """Set the number."""
-        await self._value_dps.async_set_value(self._device, value)
+        _LOGGER.info("%s setting value to %s", self._config.config_id, value)
+        settings = {}
+        if self._decimal_dps is not None:
+            whole = int(value)
+            decimal = value - whole
+            settings = self._decimal_dps.get_values_to_set(self._device, decimal)
+            value = whole
+
+        settings = settings | self._value_dps.get_values_to_set(
+            self._device, value, settings
+        )
+
+        await self._device.async_set_properties(settings)

@@ -1,34 +1,96 @@
 name: Camera
 products:
   - id: n7h0m2x7i2yzol0p
-    name: LSC PTZ
-primary_entity:
-  entity: camera
-  dps:
-    - id: 134
-      type: boolean
-      name: motion_enable
-      optional: true
-    - id: 150
-      type: boolean
-      name: record
-      optional: true
-    - id: 115
-      type: base64
-      optional: true
-      persist: false
-      sensitive: true
-      name: snapshot
-secondary_entities:
+    manufacturer: LSC Smart Connect
+    model: PTZ
+  - id: rogprwflblumx2co
+    manufacturer: LSC Smart Connect
+    model: Rotatable
+  - id: bwolocfvtdy3w2mk
+    manufacturer: Merkury
+    model: CW035
+  - id: iq3hpslazezny9k3
+    manufacturer: LSC Smart Connect
+    model: PTZ Camera
+entities:
   - entity: switch
-    name: Flip image
+    translation_key: camera_record
+    dps:
+      - id: 150
+        type: boolean
+        optional: true
+        name: switch
+  - entity: event
+    class: motion
+    dps:
+      - id: 115
+        type: base64
+        name: event
+        optional: true
+        mapping:
+          - dps_val: null
+            value: null
+          - value: detected
+      - id: 115
+        type: base64
+        optional: true
+        name: snapshot
+  - entity: switch
+    translation_key: motion_detection
+    category: config
+    dps:
+      - id: 134
+        type: boolean
+        optional: true
+        name: switch
+  - entity: switch
+    name: Camera privacy
+    icon: "mdi:incognito"
+    dps:
+      - id: 105
+        type: boolean
+        name: switch
+  - entity: camera
+    # 2026-06-08
+    deprecated: >-
+      switch_camera_privacy, switch_camera_record, event_motion,
+      switch_motion_detection
+    dps:
+      - id: 105
+        type: boolean
+        optional: true
+        name: switch
+        mapping:
+          - dps_val: true
+            value: false
+          - dps_val: false
+            value: true
+          - dps_val: null
+            value: true
+            hidden: true
+      - id: 134
+        type: boolean
+        name: motion_enable
+        optional: true
+      - id: 150
+        type: boolean
+        name: record
+        optional: true
+      - id: 115
+        type: base64
+        optional: true
+        persist: false
+        sensitive: true
+        name: snapshot
+  - entity: switch
+    translation_key: flip_image
     category: config
     dps:
       - id: 103
         type: boolean
         name: switch
   - entity: switch
-    name: Timestamp
+    translation_key: watermark
     category: config
     dps:
       - id: 104
@@ -39,25 +101,8 @@ secondary_entities:
           - dps_val: null
             value: false
             hidden: true
-  - entity: switch
-    name: Privacy
-    category: config
-    icon: "mdi:incognito"
-    dps:
-      - id: 105
-        type: boolean
-        name: switch
-        optional: true
-        mapping:
-          - dps_val: null
-            value: false
-            hidden: true
-            icon: "mdi:incognito-off"
-          - dps_val: false
-            icon: "mdi:incognito-off"
   - entity: select
-    name: Motion sensitivity
-    icon: "mdi:motion-sensor"
+    translation_key: motion_sensitivity
     category: config
     dps:
       - id: 106
@@ -66,14 +111,13 @@ secondary_entities:
         optional: true
         mapping:
           - dps_val: "0"
-            value: Low
+            value: low
           - dps_val: "1"
-            value: Medium
+            value: medium
           - dps_val: "2"
-            value: High
+            value: high
   - entity: select
-    name: Nightvision
-    icon: "mdi:weather-night"
+    translation_key: night_vision
     category: config
     dps:
       - id: 108
@@ -82,17 +126,14 @@ secondary_entities:
         name: option
         mapping:
           - dps_val: "0"
-            value: Auto
+            value: auto
           - dps_val: "1"
-            value: "Off"
+            value: "off"
           - dps_val: "2"
-            value: "On"
-          - dps_val: null
-            value: Auto
-            hidden: true
+            value: "on"
   - entity: sensor
-    name: SD status
     class: enum
+    translation_key: sd_status
     category: diagnostic
     dps:
       - id: 110
@@ -103,7 +144,7 @@ secondary_entities:
           - dps_val: 1
             value: normal
           - dps_val: 2
-            value: error
+            value: fault
           - dps_val: 3
             value: full
           - dps_val: 4
@@ -292,8 +333,7 @@ secondary_entities:
           - dps_val: "1"
             value: "High"
   - entity: select
-    name: Recording mode
-    icon: "mdi:file-video"
+    translation_key: recording_mode
     category: config
     dps:
       - id: 151
@@ -302,9 +342,9 @@ secondary_entities:
         optional: true
         mapping:
           - dps_val: "1"
-            value: Event
+            value: event
           - dps_val: "2"
-            value: Continuous
+            value: continuous
   - entity: switch
     name: Alarm
     category: config
@@ -347,6 +387,7 @@ secondary_entities:
     name: Anti-flicker
     icon: "mdi:television-classic"
     category: config
+    hidden: unavailable
     dps:
       - id: 188
         type: string
@@ -359,3 +400,43 @@ secondary_entities:
             value: "50Hz"
           - dps_val: "2"
             value: "60Hz"
+      - id: 188
+        type: string
+        name: available
+        optional: true
+        mapping:
+          - dps_val: null
+            value: false
+          - value: true
+  - entity: switch
+    name: Motion limit area
+    category: config
+    icon: "mdi:picture-in-picture-bottom-right-outline"
+    hidden: unavailable
+    dps:
+      - id: 168
+        type: boolean
+        optional: true
+        name: switch
+      - id: 168
+        type: boolean
+        optional: true
+        name: available
+        mapping:
+          - dps_val: null
+            value: false
+          - value: true
+  - entity: text
+    name: Motion limit area
+    hidden: true
+    icon: "mdi:picture-in-picture-bottom-right-outline"
+    category: config
+    dps:
+      - id: 169
+        type: string
+        optional: true
+        name: value
+      - id: 168
+        type: boolean
+        optional: true
+        name: available

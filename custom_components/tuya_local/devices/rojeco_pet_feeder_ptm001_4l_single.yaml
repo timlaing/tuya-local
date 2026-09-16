@@ -1,17 +1,17 @@
 name: Pet feeder
 products:
   - id: opnbfbjlnpdjwior
-    name: Rojeco PTM-001 4L Single Bowl
-primary_entity:
-  entity: button
-  icon: "mdi:food-drumstick"
-  name: Quick feed
-  dps:
-    - id: 12
-      type: boolean
-      name: button
-      optional: true
-secondary_entities:
+    manufacturer: Rojeco
+    model: PTM-001 4L Single Bowl
+entities:
+  - entity: button
+    icon: "mdi:food-drumstick"
+    name: Quick feed
+    dps:
+      - id: 12
+        type: boolean
+        name: button
+        optional: true
   - entity: sensor
     icon: "mdi:paw"
     name: Last amount
@@ -27,21 +27,21 @@ secondary_entities:
     name: Feed state
     icon: "mdi:valve"
     class: enum
+    translation_key: status
     dps:
       - id: 4
         name: sensor
         type: string
         mapping:
           - dps_val: standby
-            value: Standby
+            value: standby
           - dps_val: feeding
-            value: Feeding
+            value: feeding
           - dps_val: done
-            value: Done
+            value: done
   - entity: number
-    name: Manual feed
+    translation_key: manual_feed
     category: config
-    icon: "mdi:paw"
     dps:
       - id: 3
         type: integer

@@ -1,48 +1,40 @@
 name: Valve controller
 products:
   - id: nguto5atyd2xxnap
-    name: ARD-100+ smart valve controller
-primary_entity:
-  entity: valve
-  dps:
-    - id: 1
-      type: boolean
-      name: valve
-secondary_entities:
-  - entity: switch
-    icon: "mdi:valve"
-    deprecated: valve
-    category: config
+    model: ARD-100+
+  - id: key5ckdnys3pqgec
+  - id: keyfxuj3d5wg53wx
+  - id: key7axydcvmea3x9
+    manufacturer: Nous
+    model: L3
+entities:
+  - entity: valve
     dps:
       - id: 1
         type: boolean
-        name: switch
-  - entity: number
+        name: valve
+  - entity: time
     translation_key: timer
     category: config
     dps:
       - id: 7
-        name: value
+        name: second
         type: integer
         range:
           min: 0
           max: 86400
-        unit: sec
-        mapping:
-          - scale: 1
-          - dps_val: null
   - entity: select
-    name: Initial state
+    translation_key: initial_state
     category: config
-    icon: "mdi:toggle-switch"
     dps:
       - id: 14
         type: string
         name: option
+        optional: true
         mapping:
           - dps_val: "off"
-            value: "Off"
+            value: "off"
           - dps_val: "on"
-            value: "On"
-          - dps_val: "memory"
-            value: "Last state"
+            value: "on"
+          - dps_val: memory
+            value: memory

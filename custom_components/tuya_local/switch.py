@@ -7,9 +7,9 @@ import logging
 from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 
 from .device import TuyaLocalDevice
+from .entity import TuyaLocalEntity
 from .helpers.config import async_tuya_setup_platform
 from .helpers.device_config import TuyaEntityConfig
-from .helpers.mixin import TuyaLocalEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -64,8 +64,10 @@ class TuyaLocalSwitch(TuyaLocalEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs):
         """Turn the switch on"""
+        _LOGGER.info("%s turning on", self._config.config_id)
         await self._switch_dps.async_set_value(self._device, True)
 
     async def async_turn_off(self, **kwargs):
         """Turn the switch off"""
+        _LOGGER.info("%s turning off", self._config.config_id)
         await self._switch_dps.async_set_value(self._device, False)

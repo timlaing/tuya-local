@@ -1,27 +1,39 @@
 name: Camera
 products:
   - id: fzsbulp3wg64l8vx
-    name: TY-W160D
-primary_entity:
-  entity: camera
-  dps:
-    - id: 134
-      type: boolean
-      name: motion_enable
-      optional: true
-    - id: 150
-      type: boolean
-      name: record
-      optional: true
-    - id: 115
-      type: base64
-      optional: true
-      persist: false
-      sensitive: true
-      name: snapshot
-secondary_entities:
+    model: TY-W160D
+  - id: dm7sckewmyflqgj1
+    manufacturer: HQCAM
+    model: 2MP peephole camera
+entities:
   - entity: switch
-    name: Flip image
+    translation_key: camera_record
+    dps:
+      - id: 150
+        type: boolean
+        optional: true
+        name: switch
+  - entity: switch
+    translation_key: motion_detection
+    category: config
+    dps:
+      - id: 134
+        type: boolean
+        optional: true
+        name: switch
+  - entity: camera
+    deprecated: switch_camera_record, switch_motion_detection  # 2026-06-08
+    dps:
+      - id: 134
+        type: boolean
+        name: motion_enable
+        optional: true
+      - id: 150
+        type: boolean
+        name: record
+        optional: true
+  - entity: switch
+    translation_key: flip_image
     category: config
     dps:
       - id: 103
@@ -33,15 +45,14 @@ secondary_entities:
             value: false
             hidden: true
   - entity: switch
-    name: Timestamp
+    translation_key: watermark
     category: config
     dps:
       - id: 104
         type: boolean
         name: switch
   - entity: select
-    name: Motion sensitivity
-    icon: "mdi:motion-sensor"
+    translation_key: motion_sensitivity
     category: config
     dps:
       - id: 106
@@ -50,14 +61,13 @@ secondary_entities:
         optional: true
         mapping:
           - dps_val: "0"
-            value: Low
+            value: low
           - dps_val: "1"
-            value: Medium
+            value: medium
           - dps_val: "2"
-            value: High
+            value: high
   - entity: select
-    name: Nightvision
-    icon: "mdi:weather-night"
+    translation_key: night_vision
     category: config
     dps:
       - id: 108
@@ -66,17 +76,14 @@ secondary_entities:
         name: option
         mapping:
           - dps_val: "0"
-            value: Auto
+            value: auto
           - dps_val: "1"
-            value: "Off"
+            value: "off"
           - dps_val: "2"
-            value: "On"
-          - dps_val: null
-            value: Auto
-            hidden: true
+            value: "on"
   - entity: sensor
-    name: SD status
     class: enum
+    translation_key: sd_status
     category: diagnostic
     dps:
       - id: 110
@@ -87,7 +94,7 @@ secondary_entities:
           - dps_val: 1
             value: normal
           - dps_val: 2
-            value: error
+            value: fault
           - dps_val: 3
             value: full
           - dps_val: 4
@@ -123,8 +130,7 @@ secondary_entities:
           - dps_val: 2003
             value: Card error
   - entity: select
-    name: Recording mode
-    icon: "mdi:file-video"
+    translation_key: recording_mode
     category: config
     dps:
       - id: 151
@@ -133,6 +139,79 @@ secondary_entities:
         optional: true
         mapping:
           - dps_val: "1"
-            value: Event
+            value: event
           - dps_val: "2"
-            value: Continuous
+            value: continuous
+  - entity: event
+    class: motion
+    category: diagnostic
+    dps:
+      - id: 115
+        type: string
+        name: event
+        optional: true
+        mapping:
+          - dps_val: null
+            value: clear
+          - value: detected
+      - id: 115
+        type: base64
+        name: image_details
+        optional: true
+  - entity: light
+    translation_key: indicator
+    category: config
+    hidden: unavailable
+    dps:
+      - id: 101
+        type: boolean
+        optional: true
+        name: switch
+      - id: 101
+        type: boolean
+        optional: true
+        name: available
+        mapping:
+          - dps_val: null
+            value: false
+          - value: true
+  - entity: event
+    translation_key: alarm
+    dps:
+      - id: 185
+        type: string
+        optional: true
+        name: event
+        mapping:
+          - dps_val: null
+            value: null
+          - value: triggered
+      - id: 185
+        type: string
+        optional: true
+        name: message
+  - entity: event
+    translation_key: notification
+    category: diagnostic
+    dps:
+      - id: 212
+        type: string
+        optional: true
+        name: event
+        mapping:
+          - dps_val: null
+            value: null
+          - value: message
+      - id: 212
+        type: string
+        optional: true
+        name: message
+  - entity: button
+    class: restart
+    category: config
+    hidden: true
+    dps:
+      - id: 162
+        type: boolean
+        optional: true
+        name: button

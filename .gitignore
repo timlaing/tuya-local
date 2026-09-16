@@ -1,6 +1,9 @@
 /.idea/
+/.vs/
 /.vscode/
 /.env/
+/.venv/
+/*.egg-info/
 __pycache__/
 .pytest_cache/
 /config/
@@ -15,3 +18,4 @@ __pycache__/
 .history
 .DS_Store
 Thumbs.db
+uv.lock

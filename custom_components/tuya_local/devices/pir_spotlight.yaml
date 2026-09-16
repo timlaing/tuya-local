@@ -1,52 +1,51 @@
-name: PIR Spotlight
+name: PIR spotlight
 products:
   - id: reldobj3ny6fbgvw
-    name: WiFi Duo LED Light WFD 3050 P
+    model: Duo LED
+    model_id: WFD 3050 P
   - id: 2twfjfhdvygxxqtq
-    name: Nedis SmartLife Outdoor Floodlight
-primary_entity:
-  entity: light
-  dps:
-    - id: 20
-      type: boolean
-      name: switch
-    - id: 21
-      type: string
-      name: work_mode
-    - id: 22
-      name: brightness
-      type: integer
-      range:
-        min: 10
-        max: 1000
-    - id: 23
-      name: color_temp
-      type: integer
-      optional: true
-      range:
-        min: 0
-        max: 1000
-      mapping:
-        - target_range:
-            min: 2700
-            max: 6500
-secondary_entities:
-  - entity: number
+    manufacturer: Nedis
+    name: Outdoor floodlight
+  - id: key3pw4guvnat9ad
+    manufacturer: LSC
+    name: Floodlight with sensor
+entities:
+  - entity: light
+    dps:
+      - id: 20
+        type: boolean
+        name: switch
+      - id: 21
+        type: string
+        name: work_mode
+      - id: 22
+        name: brightness
+        type: integer
+        range:
+          min: 10
+          max: 1000
+      - id: 23
+        name: color_temp
+        type: integer
+        optional: true
+        range:
+          min: 0
+          max: 1000
+        mapping:
+          - target_range:
+              min: 2700
+              max: 6500
+  - entity: time
     translation_key: timer
     category: config
     dps:
       - id: 26
-        name: value
+        name: second
         type: integer
         optional: true
         range:
           min: 0
           max: 86400
-        unit: min
-        mapping:
-          - scale: 60
-            step: 60
-          - dps_val: null
   - entity: switch
     name: Manual mode
     category: config
@@ -60,7 +59,6 @@ secondary_entities:
           - dps_val: manual
             value: true
         optional: true
-        force: true
   - entity: switch
     name: PIR enabled
     category: config
@@ -69,7 +67,6 @@ secondary_entities:
         type: boolean
         name: switch
         optional: true
-        force: true
   - entity: event
     class: motion
     dps:
@@ -82,21 +79,20 @@ secondary_entities:
           - dps_val: none
             value: clear
   - entity: select
-    name: Motion distance
+    translation_key: motion_sensitivity
     category: config
     dps:
       - id: 54
         type: string
         name: option
+        optional: true
         mapping:
           - dps_val: "high"
-            value: "Far"
-          - dps_val: "low"
-            value: "Near"
+            value: high
           - dps_val: "middle"
-            value: "Medium"
-        optional: true
-        force: true
+            value: medium
+          - dps_val: "low"
+            value: low
   - entity: number
     name: Full light duration
     category: config
@@ -108,12 +104,8 @@ secondary_entities:
         range:
           min: 5
           max: 3600
-        unit: sec
-        mapping:
-          - scale: 1
-          - dps_val: null
+        unit: s
         optional: true
-        force: true
   - entity: number
     name: Standby delay
     category: config
@@ -125,27 +117,21 @@ secondary_entities:
           min: 1
           max: 480
         unit: min
-        mapping:
-          - scale: 1
-          - dps_val: null
         optional: true
-        force: true
   - entity: number
-    name: Standby bright
+    name: Standby brightness
     category: config
     dps:
       - id: 59
         name: value
         type: integer
+        unit: "%"
+        optional: true
         range:
           min: 0
           max: 1000
-        unit: min
         mapping:
-          - scale: 1
-          - dps_val: null
-        optional: true
-        force: true
+          - scale: 10
   - entity: select
     name: Ambient light sensor
     category: config
@@ -169,4 +155,3 @@ secondary_entities:
           - dps_val: now
             value: Now
         optional: true
-        force: true

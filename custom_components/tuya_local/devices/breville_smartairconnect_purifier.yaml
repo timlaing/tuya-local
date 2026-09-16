@@ -1,33 +1,33 @@
-name: Breville Smart Air Connect Purifier
+name: Air purifier
 products:
   - id: tltdxtehttjbkjni
-primary_entity:
-  entity: fan
-  translation_only_key: fan_with_presets
-  icon: "mdi:air-purifier"
-  dps:
-    - id: 1
-      name: switch
-      type: boolean
-    - id: 3
-      name: preset_mode
-      type: string
-      mapping:
-        - dps_val: manual
-          value: normal
-        - dps_val: auto
-          value: smart
-    - id: 4
-      type: string
-      name: speed
-      mapping:
-        - dps_val: low
-          value: 33
-        - dps_val: mid
-          value: 66
-        - dps_val: high
-          value: 100
-secondary_entities:
+    manufacturer: Breville
+    model: Smart Air Connect
+entities:
+  - entity: fan
+    translation_key: air_purifier
+    dps:
+      - id: 1
+        name: switch
+        type: boolean
+      - id: 3
+        name: preset_mode
+        type: string
+        mapping:
+          - dps_val: manual
+            value: manual
+          - dps_val: auto
+            value: auto
+      - id: 4
+        type: string
+        name: speed
+        mapping:
+          - dps_val: low
+            value: 33
+          - dps_val: mid
+            value: 66
+          - dps_val: high
+            value: 100
   - entity: sensor
     class: pm25
     dps:
@@ -37,9 +37,8 @@ secondary_entities:
         type: integer
         unit: ugm3
   - entity: switch
-    name: Night mode
+    translation_key: night_mode
     category: config
-    icon: "mdi:lightbulb-night"
     dps:
       - id: 8
         name: switch
@@ -53,10 +52,9 @@ secondary_entities:
         name: switch
         type: boolean
   - entity: sensor
-    name: Filter days left
+    translation_key: filter_life
     category: diagnostic
     class: duration
-    icon: "mdi:air-filter"
     dps:
       - id: 16
         name: sensor
@@ -70,14 +68,14 @@ secondary_entities:
         type: string
         name: option
         mapping:
-          - dps_val: "cancle"
-            value: "Cancel"
+          - dps_val: cancle
+            value: cancel
           - dps_val: "2"
-            value: "2 hour"
+            value: "2h"
           - dps_val: "4"
-            value: "4 hours"
+            value: "4h"
           - dps_val: "8"
-            value: "8 hours"
+            value: "8h"
   - entity: sensor
     translation_key: time_remaining
     category: diagnostic
@@ -88,19 +86,18 @@ secondary_entities:
         type: integer
         unit: min
   - entity: sensor
-    name: Air quality
+    translation_key: air_quality
     class: enum
-    icon: "mdi:air-filter"
     dps:
       - id: 22
         name: sensor
         type: string
         mapping:
-          - dps_val: "great"
-            value: "Great"
-          - dps_val: "good"
-            value: "Good"
-          - dps_val: "medium"
-            value: "Medium"
-          - dps_val: "severe"
-            value: "Severe"
+          - dps_val: great
+            value: excellent
+          - dps_val: good
+            value: good
+          - dps_val: medium
+            value: poor
+          - dps_val: severe
+            value: severe

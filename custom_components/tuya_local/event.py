@@ -7,9 +7,9 @@ import logging
 from homeassistant.components.event import EventDeviceClass, EventEntity
 
 from .device import TuyaLocalDevice
+from .entity import TuyaLocalEntity
 from .helpers.config import async_tuya_setup_platform
 from .helpers.device_config import TuyaEntityConfig
-from .helpers.mixin import TuyaLocalEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -77,6 +77,14 @@ class TuyaLocalEvent(TuyaLocalEntity, EventEntity):
                     value,
                 )
                 self._last_value = value
+                if value not in self._attr_event_types:
+                    _LOGGER.warning(
+                        "%s/%s received value %s not in event types, ignoring",
+                        self._config._device.config,
+                        self.name or "event",
+                        value,
+                    )
+                    return
                 self._trigger_event(
                     value,
                     self.extra_state_attributes,
